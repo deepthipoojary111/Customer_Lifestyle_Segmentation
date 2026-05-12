@@ -56,6 +56,9 @@ This project focuses on analyzing customer purchasing behavior and segmenting cu
 - CASE Statements
 - Views
 - Foreign Keys
+- CASE Statements
+- Customer Segmentation
+- Window Functions
 
 ---
 
@@ -65,6 +68,11 @@ This project focuses on analyzing customer purchasing behavior and segmenting cu
 - Evaluated sales by product category
 - Compared revenue across sales channels
 - Generated lifecycle-based customer segmentation
+- Segmented customers into New, Active, Loyal, At-Risk, and Churned categories
+- Identified high-value and repeat customers
+- Analyzed customer purchase behavior
+- Evaluated revenue contribution by lifecycle stage
+- Compared sales performance across channels and product categories
 
 ---
 
