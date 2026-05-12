@@ -141,4 +141,76 @@ SELECT order_status, COUNT(*) AS count
 FROM orders
 GROUP BY order_status;
 
+-- Customer Lifecycle Segmentation
+SELECT 
+    customer_id,
+    MAX(order_date) AS last_order_date,
+    DATEDIFF('2025-04-22', MAX(order_date)) AS days_since_purchase,
+    COUNT(order_id) AS total_orders,
+    
+    CASE
+        WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 30 
+             AND COUNT(order_id) <= 2 THEN 'New'
+             
+        WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+             AND COUNT(order_id) < 5 THEN 'Active'
+             
+        WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+             AND COUNT(order_id) >= 5 THEN 'Loyal'
+             
+        WHEN DATEDIFF('2025-04-22', MAX(order_date)) BETWEEN 91 AND 180 
+             THEN 'At-Risk'
+             
+        ELSE 'Churned'
+    END AS lifecycle_stage
+
+FROM orders
+GROUP BY customer_id;
+
+-- Count customers in each segment
+SELECT lifecycle_stage, COUNT(*) AS total_customers
+FROM (
+    SELECT 
+        customer_id,
+        CASE
+            WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 30 
+                 AND COUNT(order_id) <= 2 THEN 'New'
+            WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+                 AND COUNT(order_id) < 5 THEN 'Active'
+            WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+                 AND COUNT(order_id) >= 5 THEN 'Loyal'
+            WHEN DATEDIFF('2025-04-22', MAX(order_date)) BETWEEN 91 AND 180 
+                 THEN 'At-Risk'
+            ELSE 'Churned'
+        END AS lifecycle_stage
+    FROM orders
+    GROUP BY customer_id
+) t
+GROUP BY lifecycle_stage;
+
+-- Revenue by lifecycle stage
+SELECT lifecycle_stage,
+       SUM(total_spent) AS revenue
+FROM (
+    SELECT customer_id,
+           SUM(net_amount) AS total_spent,
+           
+           CASE
+               WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 30 
+                    AND COUNT(order_id) <= 2 THEN 'New'
+               WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+                    AND COUNT(order_id) < 5 THEN 'Active'
+               WHEN DATEDIFF('2025-04-22', MAX(order_date)) <= 90 
+                    AND COUNT(order_id) >= 5 THEN 'Loyal'
+               WHEN DATEDIFF('2025-04-22', MAX(order_date)) BETWEEN 91 AND 180 
+                    THEN 'At-Risk'
+               ELSE 'Churned'
+           END AS lifecycle_stage
+           
+    FROM orders
+    GROUP BY customer_id
+) t
+GROUP BY lifecycle_stage;
+
+
 
